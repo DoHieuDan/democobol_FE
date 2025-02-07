@@ -3,18 +3,17 @@ import { type ChangeEvent, useState, type KeyboardEvent } from 'react';
 import { Helmet } from 'react-helmet';
 import axios from 'axios';
 import httpConfig from '../../config/httpConfig';
-
+import { useNavigate } from "react-router-dom";
 import { GridItem } from '../../components/GridSystem';
-import Input from '../../components/Input';
 
 export default function COUSR02() {
 
     type formInput = {
-        usridin: string,
-        fname: string,
-        lname: string,
-        passwd: string,
-        usrtype: string,
+        userId: string,
+        firstName: string,
+        lastName: string,
+        password: string,
+        role: string,
 
     }
 
@@ -33,11 +32,11 @@ export default function COUSR02() {
 
     const [formData, setFormData] = useState<formInput>(
         {
-            usridin: '',
-            fname: '',
-            lname: '',
-            passwd: '',
-            usrtype: '',
+            userId: '',
+            firstName: '',
+            lastName: '',
+            password: '',
+            role: '',
 
         });
     const [receivedData, setReceivedData] = useState<formOutput>(
@@ -63,20 +62,58 @@ export default function COUSR02() {
         });
     };
 
+    const navigate = useNavigate();
+
     const handleSubmit = async (event: KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-            for (const key in formData) {
-                if (!formData[key]) {
-                    return;
-                }
+            if (!formData.userId) {
+                return; // Ngăn request nếu userId trống
             }
 
-            const response = await axios.post(
-                httpConfig.domain + '/Cousr02',
-                formData
-            );
+            try {
+                const response = await axios.get(`${httpConfig.domain}/api/v1/user/${formData.userId}`);
 
-            setReceivedData(_state => response.data);
+                // Extracting the 'result' object correctly
+                const userData = response.data?.result;
+
+                if (userData && userData.userId) {
+                    // Populate form fields with the retrieved data
+                    setFormData({
+                        userId: userData.userId.trim(),
+                        firstName: userData.firstName.trim(),
+                        lastName: userData.lastName.trim(),
+                        password: userData.password.trim(),
+                        role: userData.role.trim(),
+                    });
+
+                    // Clear error message if successful
+                    setReceivedData(prevState => ({
+                        ...prevState,
+                        errmsg: '',
+                    }));
+                } else {
+                    setReceivedData(prevState => ({
+                        ...prevState,
+                        errmsg: response.data.message || 'User not found'
+                    }));
+                }
+            } catch (error) {
+                console.error("Lỗi khi gửi request:", error);
+                setReceivedData(prevState => ({
+                    ...prevState,
+                    errmsg: 'Lỗi kết nối đến server'
+                }));
+            }
+        }
+        else if (event.key === 'F4') {
+            // Khi nhấn F4 -> Xóa userId và một số trường hiển thị
+            setFormData({
+                userId: '',
+                firstName: '',
+                lastName: '',
+                password: '',
+                role: '',
+            });
         }
     };
 
@@ -172,7 +209,7 @@ export default function COUSR02() {
 
 
             <GridItem col={21} row={6}>
-                <Input maxLength={8} className='bms underLine' name='usridin' id='usridin' type='text' styles={{ color: "green" }} onChange={handleInputChange} onKeyDown={handleSubmit} />
+                <input maxLength={8} className='bms underLine' name='userId' id='userId' value={formData.userId} type='text' style={{ color: "green" }} onChange={handleInputChange} onKeyDown={handleSubmit} />
             </GridItem>
 
             <GridItem col={30} row={6}>
@@ -197,7 +234,7 @@ export default function COUSR02() {
 
 
             <GridItem col={18} row={11}>
-                <Input maxLength={20} className='bms underLine' name='fname' id='fname' type='text' styles={{ color: "green" }} onChange={handleInputChange} onKeyDown={handleSubmit} />
+                <input maxLength={20} className='bms underLine' name='firstName' id='firstName' value={formData.firstName} type='text' style={{ color: "green" }} onChange={handleInputChange} onKeyDown={handleSubmit} />
             </GridItem>
 
             <GridItem col={39} row={11}>
@@ -215,7 +252,7 @@ export default function COUSR02() {
 
 
             <GridItem col={56} row={11}>
-                <Input maxLength={20} className='bms underLine' name='lname' id='lname' type='text' styles={{ color: "green" }} onChange={handleInputChange} onKeyDown={handleSubmit} />
+                <input maxLength={20} className='bms underLine' name='lastName' id='lastName' value={formData.lastName} type='text' style={{ color: "green" }} onChange={handleInputChange} onKeyDown={handleSubmit} />
             </GridItem>
 
             <GridItem col={77} row={11}>
@@ -233,7 +270,7 @@ export default function COUSR02() {
 
 
             <GridItem col={16} row={13}>
-                <Input maxLength={8} className='bms underLine' name='passwd' id='passwd' type='text' styles={{ color: "green" }} onChange={handleInputChange} onKeyDown={handleSubmit} />
+                <input maxLength={8} className='bms underLine' name='password' id='password' value={formData.password} type='text' style={{ color: "green" }} onChange={handleInputChange} onKeyDown={handleSubmit} />
             </GridItem>
 
             <GridItem col={25} row={13}>
@@ -251,7 +288,7 @@ export default function COUSR02() {
 
 
             <GridItem col={17} row={15}>
-                <Input maxLength={1} className='bms underLine' name='usrtype' id='usrtype' type='text' styles={{ color: "green" }} onChange={handleInputChange} onKeyDown={handleSubmit} />
+                <input maxLength={1} className='bms underLine' name='role' id='role' type='text' value={formData.role} style={{ color: "green" }} onChange={handleInputChange} onKeyDown={handleSubmit} />
             </GridItem>
 
             <GridItem col={19} row={15}>
