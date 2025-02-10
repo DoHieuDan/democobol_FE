@@ -1,5 +1,6 @@
 
-import { type ChangeEvent, useState, type KeyboardEvent } from 'react';
+import { type ChangeEvent, useState, useEffect, type KeyboardEvent } from 'react';
+import { useNavigate } from "react-router-dom";
 import { Helmet } from 'react-helmet';
 import axios from 'axios';
 import httpConfig from '../../config/httpConfig';
@@ -55,6 +56,27 @@ export default function COUSR01() {
 
         });
 
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === "F3") {
+                event.preventDefault();
+                navigate("/COADM01"); // Quay lại trang ADMIN
+            }
+
+            if (event.key === "F12") {
+                event.preventDefault();
+                navigate("/"); // Quay lại trang HOME
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [navigate]);
+
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
         setFormData((state) => {
             return {
@@ -75,7 +97,7 @@ export default function COUSR01() {
         });
         setReceivedData(prevState => ({
             ...prevState,
-            errmsg: '', 
+            errmsg: '',
             msg: '',
         }))
     };
@@ -90,7 +112,7 @@ export default function COUSR01() {
                     httpConfig.domain + '/api/v1/user',
                     formData
                 );
-        
+
                 setFormData({
                     firstName: '',
                     lastName: '',
@@ -105,18 +127,19 @@ export default function COUSR01() {
                     msg: response?.data.message,
                 }));
 
-        } catch (error: any) {
-            if (error.response) {
-                // Lấy lỗi đầu tiên từ details nếu có, nếu không thì lấy message
-                const errmsg = typeof error.response.data.details === "string" ? error.response.data.details
-                    : Object.values(error.response.data.details)[0]
-                    ? Object.values(error.response.data.details)[0] : "Lỗi không xác định";
-        
-                setReceivedData(prevState => ({
-                    ...prevState,
-                    errmsg: errmsg, // Thêm lỗi vào state
-                }))}
-        }
+            } catch (error: any) {
+                if (error.response) {
+                    // Lấy lỗi đầu tiên từ details nếu có, nếu không thì lấy message
+                    const errmsg = typeof error.response.data.details === "string" ? error.response.data.details
+                        : error.response.data.details
+                            ? Object.values(error.response.data.details)[0] : "Lỗi không xác định";
+
+                    setReceivedData(prevState => ({
+                        ...prevState,
+                        errmsg: errmsg, // Thêm lỗi vào state
+                    }))
+                }
+            }
 
         } else if (event.key === "F4") {
             event.preventDefault();
