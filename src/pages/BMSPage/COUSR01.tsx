@@ -27,6 +27,7 @@ export default function COUSR01() {
         title02: string,
         curtime: string,
         errmsg: string,
+        msg: string
 
     }
 
@@ -50,6 +51,7 @@ export default function COUSR01() {
             title02: '',
             curtime: 'hh:mm:ss',
             errmsg: '',
+            msg: '',
 
         });
 
@@ -70,8 +72,12 @@ export default function COUSR01() {
             userId: '',
             password: '',
             role: '',
-
         });
+        setReceivedData(prevState => ({
+            ...prevState,
+            errmsg: '', 
+            msg: '',
+        }))
     };
 
     const handleSubmit = async (event: KeyboardEvent<HTMLInputElement>) => {
@@ -79,20 +85,38 @@ export default function COUSR01() {
 
             console.log(formData);
 
-            const response = await axios.post(
-                httpConfig.domain + '/api/v1/user',
-                formData
-            );
-            console.log(response);
-            setFormData({
-                firstName: '',
-                lastName: '',
-                userId: '',
-                password: '',
-                role: '',
-            });
-            setReceivedData(_state => response.data);
-            console.log("Đã thêm user mới vào db");
+            try {
+                const response = await axios.post(
+                    httpConfig.domain + '/api/v1/user',
+                    formData
+                );
+        
+                setFormData({
+                    firstName: '',
+                    lastName: '',
+                    userId: '',
+                    password: '',
+                    role: '',
+                });
+                setReceivedData(_state => response.data);
+
+                setReceivedData(prevState => ({
+                    ...prevState,
+                    msg: response?.data.message,
+                }));
+
+        } catch (error: any) {
+            if (error.response) {
+                // Lấy lỗi đầu tiên từ details nếu có, nếu không thì lấy message
+                const errmsg = typeof error.response.data.details === "string" ? error.response.data.details
+                    : Object.values(error.response.data.details)[0]
+                    ? Object.values(error.response.data.details)[0] : "Lỗi không xác định";
+        
+                setReceivedData(prevState => ({
+                    ...prevState,
+                    errmsg: errmsg, // Thêm lỗi vào state
+                }))}
+        }
 
         } else if (event.key === "F4") {
             event.preventDefault();
@@ -278,6 +302,9 @@ export default function COUSR01() {
             <GridItem col={1} row={23}>
                 <pre style={{ color: "red" }}>
                     {receivedData.errmsg}
+                </pre>
+                <pre style={{ color: "green" }}>
+                    {receivedData.msg}
                 </pre>
             </GridItem>
 
