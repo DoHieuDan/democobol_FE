@@ -3,7 +3,7 @@ export const dateFormat = function (date: Date, display_dot = false) {
   const year = date.getFullYear().toString().slice(-2);
   const month = ('0' + (date.getMonth() + 1)).slice(-2);
   const day = ('0' + date.getDate()).slice(-2);
-  return display_dot ? `${year}.${month}.${day}` : `${year}/${month}/${day}`;;
+  return display_dot ? `${year}.${month}.${day}` : `${month}/${day}/${year}`;;
 };
 
 export const timeFormat = function (date: Date) {
