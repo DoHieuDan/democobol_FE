@@ -130,19 +130,19 @@ export default function COUSR03() {
             firstName: "",
             lastName: "",
             role: "",
-            errmsg: "User deleted successfully!",
+            errmsg: response.data.message,
           }));
         } else {
           setReceivedData((prevState) => ({
             ...prevState,
-            errmsg: response.data.message || "Không thể xóa user!",
+            errmsg: response.data.message,
           }));
         }
       } catch (error) {
         console.error("A", error);
         setReceivedData((prevState) => ({
           ...prevState,
-          errmsg: "Error!",
+          errmsg: (error as any)?.response?.data.message,
         }));
       }
     }
