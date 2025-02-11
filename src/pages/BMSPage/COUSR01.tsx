@@ -6,6 +6,7 @@ import axios from 'axios';
 import httpConfig from '../../config/httpConfig';
 
 import { GridItem } from '../../components/GridSystem';
+import { dateFormat, timeFormat } from '../../utils/dateTimeFormat';
 
 export default function COUSR01() {
 
@@ -41,6 +42,7 @@ export default function COUSR01() {
             role: '',
 
         });
+
     const [receivedData, setReceivedData] = useState<formOutput>(
         {
             cousr01: '',
@@ -58,6 +60,18 @@ export default function COUSR01() {
 
     const navigate = useNavigate();
 
+    const [currentDateTime, setCurrentDateTime] = useState<Date>(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentDateTime(new Date());
+        }, 1000);
+
+        return () => {
+            clearInterval(timer);
+        };
+    }, []);
+
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.key === "F3") {
@@ -68,6 +82,11 @@ export default function COUSR01() {
             if (event.key === "F12") {
                 event.preventDefault();
                 navigate("/"); // Quay lại trang HOME
+            }
+
+            if (event.key === "F4") {
+                event.preventDefault();
+                clearForm(); // Xóa toàn bộ thông tin đã nhập
             }
         };
 
@@ -102,49 +121,88 @@ export default function COUSR01() {
         }))
     };
 
+    const validateFormData = (data: formInput) => {
+        if (!data.firstName) {
+            receivedData.errmsg = "First Name can NOT be empty..."
+            return false;
+        }
+
+        if (!data.lastName) {
+            receivedData.errmsg = "Last Name can NOT be empty..."
+            return false;
+        }
+
+        if (!data.userId) {
+            receivedData.errmsg = "User ID can NOT be empty..."
+            return false;
+        }
+
+        if (data.userId.length != 8) {
+            receivedData.errmsg = "User ID must be exactly 8 characters..."
+            return false;
+        }
+
+        if (!data.password) {
+            receivedData.errmsg = "Password can NOT be empty..."
+            return false;
+        }
+
+        if (data.password.length != 8) {
+            receivedData.errmsg = "Password must be exactly 8 characters..."
+            return false;
+        }
+
+        if (!data.role) {
+            receivedData.errmsg = "User type can NOT be empty..."
+            return false;
+        }
+
+        if (data.role != "A" && data.role != "U") {
+            receivedData.errmsg = "User type must be 'A' or 'U'"
+            return false;
+        }
+
+        return true;
+    };
+
     const handleSubmit = async (event: KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
 
-            console.log(formData);
+            if (validateFormData(formData)) {
+                try {
+                    const response = await axios.post(
+                        httpConfig.domain + httpConfig.resources.user,
+                        formData
+                    );
 
-            try {
-                const response = await axios.post(
-                    httpConfig.domain + '/api/v1/user',
-                    formData
-                );
-
-                setFormData({
-                    firstName: '',
-                    lastName: '',
-                    userId: '',
-                    password: '',
-                    role: '',
-                });
-                setReceivedData(_state => response.data);
-
-                setReceivedData(prevState => ({
-                    ...prevState,
-                    msg: response?.data.message,
-                }));
-
-            } catch (error: any) {
-                if (error.response) {
-                    // Lấy lỗi đầu tiên từ details nếu có, nếu không thì lấy message
-                    const errmsg = typeof error.response.data.details === "string" ? error.response.data.details
-                        : error.response.data.details
-                            ? Object.values(error.response.data.details)[0] : "Lỗi không xác định";
+                    setFormData({
+                        firstName: '',
+                        lastName: '',
+                        userId: '',
+                        password: '',
+                        role: '',
+                    });
+                    setReceivedData(_state => response.data);
 
                     setReceivedData(prevState => ({
                         ...prevState,
-                        errmsg: errmsg, // Thêm lỗi vào state
-                    }))
+                        msg: response?.data.message,
+                    }));
+
+                } catch (error: any) {
+                    if (error.response) {
+                        // Lấy lỗi đầu tiên từ details nếu có, nếu không thì lấy message
+                        const errmsg = typeof error.response.data.details === "string" ? error.response.data.details
+                            : error.response.data.details
+                                ? Object.values(error.response.data.details)[0] : "Unknown error";
+
+                        setReceivedData(prevState => ({
+                            ...prevState,
+                            errmsg: errmsg, // Thêm lỗi vào state
+                        }))
+                    }
                 }
             }
-
-        } else if (event.key === "F4") {
-            event.preventDefault();
-            alert("You pressed F4! Clearing...");
-            clearForm(); // Xóa toàn bộ thông tin đã nhập
         }
     };
 
@@ -182,13 +240,13 @@ export default function COUSR01() {
                 </pre>
             </GridItem>
 
-
-            <GridItem col={71} row={1}>
-                <pre style={{ color: "#7faded" }}>
-                    {receivedData.curdate}
-                </pre>
+            <GridItem row={1} col={71}>
+                <p>
+                    {dateFormat(currentDateTime)}
+                    <br />
+                    {timeFormat(currentDateTime)}
+                </p>
             </GridItem>
-
 
             <GridItem col={1} row={2}>
                 <pre style={{ color: "#7faded" }}>
@@ -214,13 +272,6 @@ export default function COUSR01() {
             <GridItem col={65} row={2}>
                 <pre style={{ color: "#7faded" }}>
                     Time:
-                </pre>
-            </GridItem>
-
-
-            <GridItem col={71} row={2}>
-                <pre style={{ color: "#7faded" }}>
-                    {receivedData.curtime}
                 </pre>
             </GridItem>
 
