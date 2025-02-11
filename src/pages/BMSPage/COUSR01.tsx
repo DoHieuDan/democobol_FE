@@ -47,10 +47,10 @@ export default function COUSR01() {
         {
             cousr01: '',
             cousr1a: '',
-            trnname: '',
+            trnname: 'CU01',
             title01: '',
             curdate: 'mm/dd/yy',
-            pgmname: '',
+            pgmname: 'COUSR01C',
             title02: '',
             curtime: 'hh:mm:ss',
             errmsg: '',
@@ -241,11 +241,15 @@ export default function COUSR01() {
             </GridItem>
 
             <GridItem row={1} col={71}>
-                <p>
+                <pre style={{ color: "#7faded" }}>
                     {dateFormat(currentDateTime)}
-                    <br />
+                </pre>
+            </GridItem>
+
+            <GridItem row={2} col={71}>
+                <pre style={{ color: "#7faded" }}>
                     {timeFormat(currentDateTime)}
-                </p>
+                </pre>
             </GridItem>
 
             <GridItem col={1} row={2}>
