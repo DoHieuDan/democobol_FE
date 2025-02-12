@@ -73,10 +73,10 @@ export default function COUSR00() {
     fname09: string;
     lname09: string;
     utype09: string;
-    usrid10: string;
-    fname10: string;
-    lname10: string;
-    utype10: string;
+    usrid010: string;
+    fname010: string;
+    lname010: string;
+    utype010: string;
     errmsg: string;
   };
 
@@ -139,10 +139,10 @@ export default function COUSR00() {
     fname09: " ",
     lname09: " ",
     utype09: " ",
-    usrid10: " ",
-    fname10: " ",
-    lname10: " ",
-    utype10: " ",
+    usrid010: " ",
+    fname010: " ",
+    lname010: " ",
+    utype010: " ",
     errmsg: "",
   });
 
@@ -155,166 +155,100 @@ export default function COUSR00() {
     });
   };
 
-  let currentPage = 1;
-
-  //   const handleSubmit = async (event: KeyboardEvent<HTMLInputElement>) => {
-  //     switch (event.key) {
-  //       case "Enter": // Gửi API khi nhấn Enter
-  //         for (const key in formData) {
-  //           if (!formData[key]) {
-  //             return;
-  //           }
-  //         }
-
-  //         try {
-  //           const response = await axios.get(
-  //             `${httpConfig.domain}/api/v1/users/10/${currentPage}`
-  //           );
-  //           console.log(response);
-  //           const users = response.data;
-
-  //           // Đảm bảo có đủ 10 mục trong danh sách
-  //           const maxEntries = 10;
-  //           const filledUsers = Array.from(
-  //             { length: maxEntries },
-  //             (_, index) =>
-  //               users[index] || {
-  //                 userId: "",
-  //                 firstName: "",
-  //                 lastName: "",
-  //                 role: "",
-  //               }
-  //           );
-
-  //           // const updatedData: formOutput = {
-  //           //   cousr00: "",
-  //           //   cousr0a: "",
-  //           //   trnname: "",
-  //           //   title01: "",
-  //           //   curdate: new Date().toLocaleDateString(),
-  //           //   pgmname: "",
-  //           //   title02: "",
-  //           //   curtime: new Date().toLocaleTimeString(),
-  //           //   pagenum: currentPage.toString(),
-  //           //   errmsg: "",
-  //           //   ...Object.fromEntries(
-  //           //     filledUsers.flatMap((user, index) => [
-  //           //       [`usrid0${index + 1}`, user.userId],
-  //           //       [`fname0${index + 1}`, user.firstName],
-  //           //       [`lname0${index + 1}`, user.lastName],
-  //           //       [`utype0${index + 1}`, user.role],
-  //           //     ])
-  //           //   ),
-  //           // };
-
-  //           // setReceivedData(updatedData);
-  //           setReceivedData((prevState) => ({
-  //             ...prevState,
-  //             cousr00: "",
-  //             cousr0a: "",
-  //             trnname: "",
-  //             title01: "",
-  //             curdate: new Date().toLocaleDateString(),
-  //             pgmname: "",
-  //             title02: "",
-  //             curtime: new Date().toLocaleTimeString(),
-  //             pagenum: currentPage.toString(),
-  //             errmsg: "",
-  //             ...Object.fromEntries(
-  //               filledUsers.flatMap((user, index) => [
-  //                 [`usrid0${index + 1}`, user.userId],
-  //                 [`fname0${index + 1}`, user.firstName],
-  //                 [`lname0${index + 1}`, user.lastName],
-  //                 [`utype0${index + 1}`, user.role],
-  //               ])
-  //             ),
-  //           }));
-  //         } catch (error) {
-  //           console.error("Lỗi khi gửi API:", error);
-  //         }
-  //         break;
-
-  //       case "F3": // Quay lại trang trước
-  //         console.log("F3: Back");
-  //         window.history.back();
-  //         break;
-
-  //       case "F7": // Lùi về trước (Backward) nhưng không nhỏ hơn 1
-  //         if (currentPage > 1) {
-  //           currentPage--;
-  //           console.log(`F7: Backward to page ${currentPage}`);
-  //         }
-  //         break;
-
-  //       case "F8": // Tiến tới trước (Forward)
-  //         currentPage++;
-  //         console.log(`F8: Forward to page ${currentPage}`);
-  //         break;
-
-  //       default:
-  //         break;
-  //     }
-  //   };
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
 
   const handleSubmit = async (event: KeyboardEvent<HTMLInputElement>) => {
     const { key } = event;
-    const inputId = event.currentTarget.value.trim();
-
-    switch (key) {
-      case "Enter":
-        if (!inputId) return;
-        try {
-          const response = await axios.get(
-            `${httpConfig.domain}/api/v1/user/${inputId}`
-          );
-          const user = response.data;
-          setReceivedData((prevState) => ({
-            ...prevState,
-            cousr00: "",
-            cousr0a: "",
-            trnname: "",
-            title01: "",
-            curdate: new Date().toLocaleDateString(),
-            pgmname: "",
-            title02: "",
-            curtime: new Date().toLocaleTimeString(),
-            pagenum: currentPage.toString(),
-            errmsg: "",
-            usrid01: user.userId,
-            fname01: user.firstName,
-            lname01: user.lastName,
-            utype01: user.role,
-          }));
-        } catch (error) {
-          console.error("Lỗi khi gửi API getById:", error);
-        }
-        break;
-      case "F3":
-        console.log("F3: Back");
-        window.history.back();
-        break;
-      case "F7":
-        event.preventDefault();
-        if (currentPage > 1) {
-          currentPage--;
-          fetchUserList(currentPage);
-          //   console.log(`F7: Backward to page ${currentPage}`);
-        }
-        break;
-      case "F8":
-        event.preventDefault();
-        currentPage++;
-        fetchUserList(currentPage);
-        console.log(`F8: Forward to page ${currentPage}`);
-        break;
+    const inputId = event.currentTarget.value.trim().toUpperCase();
+    if (key === "Enter") {
+      try {
+        const response = await axios.get(
+          `${httpConfig.domain}/api/v1/user/${inputId}`
+        );
+        const user = response?.data.result;
+        setReceivedData((prevState) => ({
+          ...prevState,
+          usrid01: user.userId,
+          fname01: user.firstName,
+          lname01: user.lastName,
+          utype01: user.role,
+          errmsg: "",
+        }));
+      } catch (error) {
+        setReceivedData((prevState) => ({
+          ...prevState,
+          errmsg: (error as any)?.response?.data.message,
+        }));
+      }
     }
+    // switch (key) {
+    //   case "Enter":
+    //     if (!inputId) return;
+    //     try {
+    //       const response = await axios.get(
+    //         `${httpConfig.domain}/api/v1/user/${inputId}`
+    //       );
+    //       const user = response?.data;
+    //       setReceivedData((prevState) => ({
+    //         ...prevState,
+    //         usrid01: user.userId,
+    //         fname01: user.firstName,
+    //         lname01: user.lastName,
+    //         utype01: user.role,
+    //         errmsg: "",
+    //       }));
+    //     } catch (error) {
+    //       console.error("Lỗi khi gửi API getById:", error);
+    //     }
+    //     break;
+    //   case "F3":
+    //     console.log("F3: Back");
+    //     window.history.back();
+    //     break;
+    //   case "F7":
+    //     event.preventDefault();
+    //     if (currentPage > 1) {
+    //       setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+    //       fetchUserList(currentPage - 1);
+    //       setReceivedData((prevState) => ({
+    //         ...prevState,
+    //         errmsg: "",
+    //       }));
+    //     } else {
+    //       setReceivedData((prevState) => ({
+    //         ...prevState,
+    //         errmsg: "You are already at the top of the page...",
+    //       }));
+    //     }
+    //     break;
+    //   case "F8":
+    //     event.preventDefault();
+    //     if (currentPage < totalPage) {
+    //       setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPage));
+    //       fetchUserList(currentPage + 1);
+    //       setReceivedData((prevState) => ({
+    //         ...prevState,
+    //         errmsg: "",
+    //       }));
+    //     } else {
+    //       setReceivedData((prevState) => ({
+    //         ...prevState,
+    //         errmsg: "You are already at the bottom of the page...",
+    //       }));
+    //     }
+    //     break;
+    // }
   };
+
+  //hàm gọi api từ back-end lấy giá trị user list
   const fetchUserList = async (page) => {
     try {
       const response = await axios.get(
         `${httpConfig.domain}/api/v1/users/10/${page}`
       );
-      console.log(response?.data);
+      setTotalPage(response?.data.totalPages);
+      //   console.log(response?.data);
       const users = response?.data.users;
       const maxEntries = 10;
       const filledUsers = Array.from(
@@ -345,7 +279,54 @@ export default function COUSR00() {
   };
 
   useEffect(() => {
+    // gọi hàm lấy dữ liệu danh sách user
     fetchUserList(currentPage);
+    const handleKeyDown = (event) => {
+      switch (event.key) {
+        case "F3":
+          console.log("F3: Back");
+          window.history.back();
+          break;
+        case "F7":
+          event.preventDefault();
+          if (currentPage > 1) {
+            setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+            fetchUserList(currentPage - 1);
+            setReceivedData((prevState) => ({
+              ...prevState,
+              errmsg: "",
+            }));
+          } else {
+            setReceivedData((prevState) => ({
+              ...prevState,
+              errmsg: "You are at the top of the page...",
+            }));
+          }
+          break;
+        case "F8":
+          event.preventDefault();
+          if (currentPage < totalPage) {
+            setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPage));
+            fetchUserList(currentPage + 1);
+            setReceivedData((prevState) => ({
+              ...prevState,
+              errmsg: "",
+            }));
+          } else {
+            setReceivedData((prevState) => ({
+              ...prevState,
+              errmsg: "You have reached the bottom of the page...",
+            }));
+          }
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [currentPage]);
 
   return (
@@ -403,7 +384,7 @@ export default function COUSR00() {
       </GridItem>
 
       <GridItem col={71} row={4}>
-        <pre style={{ color: "#7faded" }}>{receivedData.pagenum}</pre>
+        <pre style={{ color: "#7faded" }}>{currentPage}</pre>
       </GridItem>
 
       <GridItem col={5} row={6}>
@@ -782,19 +763,19 @@ export default function COUSR00() {
       </GridItem>
 
       <GridItem col={12} row={19}>
-        <pre style={{ color: "#7faded" }}>{receivedData.usrid10}</pre>
+        <pre style={{ color: "#7faded" }}>{receivedData.usrid010}</pre>
       </GridItem>
 
       <GridItem col={24} row={19}>
-        <pre style={{ color: "#7faded" }}>{receivedData.fname10}</pre>
+        <pre style={{ color: "#7faded" }}>{receivedData.fname010}</pre>
       </GridItem>
 
       <GridItem col={48} row={19}>
-        <pre style={{ color: "#7faded" }}>{receivedData.lname10}</pre>
+        <pre style={{ color: "#7faded" }}>{receivedData.lname010}</pre>
       </GridItem>
 
       <GridItem col={73} row={19}>
-        <pre style={{ color: "#7faded" }}>{receivedData.utype10}</pre>
+        <pre style={{ color: "#7faded" }}>{receivedData.utype010}</pre>
       </GridItem>
 
       <GridItem col={12} row={21}>

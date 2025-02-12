@@ -40,11 +40,37 @@ export default function COUSR03() {
     const timer = setInterval(() => {
       setCurrentDateTime(new Date());
     }, 1000);
+    const handleKeyDown = (event) => {
+      // switch (event.key) {
+      //   case "F4":
+      //     setFormData({ userId: "" });
+      //     setReceivedData((prevState) => ({
+      //       ...prevState,
+      //       firstName: "",
+      //       lastName: "",
+      //       role: "",
+      //       errmsg: "",
+      //     }));
+      //     break;
+      // }
+      if (event.key === "F4") {
+        setFormData({ userId: "" });
+        setReceivedData((prevState) => ({
+          ...prevState,
+          firstName: "",
+          lastName: "",
+          role: "",
+          errmsg: "",
+        }));
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       clearInterval(timer);
     };
   }, []);
+
   const [formData, setFormData] = useState<formInput>({
     userId: "",
   });
@@ -75,7 +101,11 @@ export default function COUSR03() {
   const handleSubmit = async (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       if (!formData.userId) {
-        return; // Ngăn request nếu userId trống
+        setReceivedData((prevState) => ({
+          ...prevState,
+          errmsg: "User ID is empty",
+        }));
+        return;
       }
 
       try {
@@ -99,26 +129,8 @@ export default function COUSR03() {
           errmsg: (error as any)?.response?.data.message,
         }));
       }
-    } else if (event.key === "F4") {
-      // Khi nhấn F4 -> Xóa userId và một số trường hiển thị
-      setFormData({ userId: "" });
-      setReceivedData((prevState) => ({
-        ...prevState,
-        firstName: "",
-        lastName: "",
-        role: "",
-        errmsg: "",
-      }));
     } else if (event.key === "F5") {
       event.preventDefault();
-      if (!formData.userId) {
-        setReceivedData((prevState) => ({
-          ...prevState,
-          errmsg: "User ID is empty",
-        }));
-        return;
-      }
-
       try {
         const response = await axios.delete(
           `${httpConfig.domain}/api/v1/user/${formData.userId}`
@@ -139,7 +151,7 @@ export default function COUSR03() {
           }));
         }
       } catch (error) {
-        console.error("A", error);
+        // console.error("A", error);
         setReceivedData((prevState) => ({
           ...prevState,
           errmsg: (error as any)?.response?.data.message,
