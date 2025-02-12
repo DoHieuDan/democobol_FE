@@ -35,45 +35,10 @@ export default function COUSR03() {
   };
 
   const [currentDateTime, setCurrentDateTime] = useState<Date>(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentDateTime(new Date());
-    }, 1000);
-    const handleKeyDown = (event) => {
-      // switch (event.key) {
-      //   case "F4":
-      //     setFormData({ userId: "" });
-      //     setReceivedData((prevState) => ({
-      //       ...prevState,
-      //       firstName: "",
-      //       lastName: "",
-      //       role: "",
-      //       errmsg: "",
-      //     }));
-      //     break;
-      // }
-      if (event.key === "F4") {
-        setFormData({ userId: "" });
-        setReceivedData((prevState) => ({
-          ...prevState,
-          firstName: "",
-          lastName: "",
-          role: "",
-          errmsg: "",
-        }));
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      clearInterval(timer);
-    };
-  }, []);
-
   const [formData, setFormData] = useState<formInput>({
     userId: "",
   });
+
   const [receivedData, setReceivedData] = useState<formOutput>({
     cousr03: "",
     cousr3a: "",
@@ -97,13 +62,40 @@ export default function COUSR03() {
       };
     });
   };
-
+  const handleDelte = async (userId) => {
+    try {
+      const response = await axios.delete(
+        `${httpConfig.domain}/api/v1/user/${userId}`
+      );
+      if (response.data.code === 200) {
+        setFormData({ userId: "" }); // Xóa userId sau khi xóa user thành công
+        setReceivedData((prevState) => ({
+          ...prevState,
+          firstName: "",
+          lastName: "",
+          role: "",
+          errmsg: response.data.message,
+        }));
+      } else {
+        setReceivedData((prevState) => ({
+          ...prevState,
+          errmsg: response.data.message,
+        }));
+      }
+    } catch (error) {
+      // console.error("A", error);
+      setReceivedData((prevState) => ({
+        ...prevState,
+        errmsg: (error as any)?.response?.data.message,
+      }));
+    }
+  };
   const handleSubmit = async (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       if (!formData.userId) {
         setReceivedData((prevState) => ({
           ...prevState,
-          errmsg: "User ID is empty",
+          errmsg: "User ID is empty...",
         }));
         return;
       }
@@ -129,37 +121,82 @@ export default function COUSR03() {
           errmsg: (error as any)?.response?.data.message,
         }));
       }
-    } else if (event.key === "F5") {
-      event.preventDefault();
-      try {
-        const response = await axios.delete(
-          `${httpConfig.domain}/api/v1/user/${formData.userId}`
-        );
-        if (response.data.code === 200) {
-          setFormData({ userId: "" }); // Xóa userId sau khi xóa user thành công
+    }
+    // else if (event.key === "F5") {
+    //   event.preventDefault();
+    //   try {
+    //     const response = await axios.delete(
+    //       `${httpConfig.domain}/api/v1/user/${formData.userId}`
+    //     );
+    //     if (response.data.code === 200) {
+    //       setFormData({ userId: "" }); // Xóa userId sau khi xóa user thành công
+    //       setReceivedData((prevState) => ({
+    //         ...prevState,
+    //         firstName: "",
+    //         lastName: "",
+    //         role: "",
+    //         errmsg: response.data.message,
+    //       }));
+    //     } else {
+    //       setReceivedData((prevState) => ({
+    //         ...prevState,
+    //         errmsg: response.data.message,
+    //       }));
+    //     }
+    //   } catch (error) {
+    //     // console.error("A", error);
+    //     setReceivedData((prevState) => ({
+    //       ...prevState,
+    //       errmsg: (error as any)?.response?.data.message,
+    //     }));
+    //   }
+    // }
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    const handleKeyDown = (event) => {
+      switch (event.key) {
+        case "F4":
+          event.preventDefault();
+          setFormData({ userId: "" });
           setReceivedData((prevState) => ({
             ...prevState,
             firstName: "",
             lastName: "",
             role: "",
-            errmsg: response.data.message,
+            errmsg: "",
           }));
-        } else {
-          setReceivedData((prevState) => ({
-            ...prevState,
-            errmsg: response.data.message,
-          }));
-        }
-      } catch (error) {
-        // console.error("A", error);
+          break;
+        case "F5":
+          event.preventDefault();
+          if (!formData.userId || formData.userId.trim() === "") {
+            setReceivedData((prevState) => ({
+              ...prevState,
+              errmsg: "User ID is empty...",
+            }));
+          } else handleDelte(formData.userId);
+          break;
+      }
+      if (event.key === "F4") {
+        setFormData({ userId: "" });
         setReceivedData((prevState) => ({
           ...prevState,
-          errmsg: (error as any)?.response?.data.message,
+          firstName: "",
+          lastName: "",
+          role: "",
+          errmsg: "",
         }));
       }
-    }
-  };
+    };
+    document.addEventListener("keydown", handleKeyDown);
 
+    return () => {
+      clearInterval(timer);
+    };
+  }, [formData.userId]);
   return (
     <>
       <Helmet>
