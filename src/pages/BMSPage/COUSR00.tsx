@@ -25,7 +25,7 @@ export default function COUSR00() {
     sel0007: string;
     sel0008: string;
     sel0009: string;
-    sel0010: string;
+    sel00010: string;
   };
 
   type formOutput = {
@@ -92,7 +92,7 @@ export default function COUSR00() {
     sel0007: "",
     sel0008: "",
     sel0009: "",
-    sel0010: "",
+    sel00010: "",
   });
   const [receivedData, setReceivedData] = useState<formOutput>({
     cousr00: "",
@@ -154,6 +154,7 @@ export default function COUSR00() {
         [event.target.name]: event.target.value,
       };
     });
+    console.log(event.target.value);
   };
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -229,6 +230,7 @@ export default function COUSR00() {
             [`utype0${index + 1}`, user.role],
           ])
         ),
+        errmsg: "",
       }));
     } catch (error) {
       console.error("Cannot get user list", error);
@@ -243,20 +245,8 @@ export default function COUSR00() {
       setCurrentDateTime(new Date());
     }, 1000);
     // gọi hàm lấy dữ liệu danh sách user
-    if (!formData.usridin || formData.usridin.trim() === "") {
-      setTimeout(() => {
-        setCurrentPage(1);
-        if (formData.usridin === "") {
-          fetchUserList(1);
-        }
-      }, 500);
-    }
-    setTimeout(() => {
-      setCurrentPage(1);
-      if (formData.usridin === " ") {
-        fetchUserList(currentPage);
-      }
-    }, 2000);
+    fetchUserList(currentPage);
+
     const handleKeyDown = (event) => {
       switch (event.key) {
         case "F3":
@@ -268,10 +258,6 @@ export default function COUSR00() {
           if (currentPage > 1) {
             setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
             fetchUserList(currentPage - 1);
-            setReceivedData((prevState) => ({
-              ...prevState,
-              errmsg: "",
-            }));
           } else {
             setReceivedData((prevState) => ({
               ...prevState,
@@ -284,10 +270,6 @@ export default function COUSR00() {
           if (currentPage < totalPage) {
             setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPage));
             fetchUserList(currentPage + 1);
-            setReceivedData((prevState) => ({
-              ...prevState,
-              errmsg: "",
-            }));
           } else {
             setReceivedData((prevState) => ({
               ...prevState,
@@ -297,13 +279,13 @@ export default function COUSR00() {
           break;
       }
     };
-
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      clearInterval(timer);
     };
-  }, [currentPage, formData.usridin]);
+  }, [currentPage, formData.usridin, totalPage]);
 
   return (
     <>
