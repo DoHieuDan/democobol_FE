@@ -12,6 +12,7 @@ import httpConfig from "../../config/httpConfig";
 
 import { GridItem } from "../../components/GridSystem";
 import { dateFormat, timeFormat } from "../../utils/dateTimeFormat";
+import { useNavigate } from "react-router-dom";
 
 export default function COUSR00() {
   type formInput = {
@@ -154,47 +155,64 @@ export default function COUSR00() {
         [event.target.name]: event.target.value,
       };
     });
-    console.log(event.target.value);
   };
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
-
+  const navigate = useNavigate();
   const handleSubmit = async (event: KeyboardEvent<HTMLInputElement>) => {
     const { key } = event;
     const inputId = event.currentTarget.value.trim().toUpperCase();
-
+    const { name, value } = event.currentTarget;
+    const uppercaseValue = value.toUpperCase();
     if (key === "Enter") {
-      try {
-        const response = await axios.get(
-          `${httpConfig.domain}/api/v1/user/${inputId}`
-        );
-        const user = response?.data.result;
-        setReceivedData((prevState) => ({
-          ...prevState,
-          usrid01: user.userId,
-          fname01: user.firstName,
-          lname01: user.lastName,
-          utype01: user.role,
-          errmsg: "",
-          ...Object.fromEntries(
-            Array.from({ length: 9 }, (_, i) => [`usrid0${i + 2}`, ""])
-          ),
-          ...Object.fromEntries(
-            Array.from({ length: 9 }, (_, i) => [`fname0${i + 2}`, ""])
-          ),
-          ...Object.fromEntries(
-            Array.from({ length: 9 }, (_, i) => [`lname0${i + 2}`, ""])
-          ),
-          ...Object.fromEntries(
-            Array.from({ length: 9 }, (_, i) => [`utype0${i + 2}`, ""])
-          ),
-        }));
-      } catch (error) {
-        setReceivedData((prevState) => ({
-          ...prevState,
-          errmsg: (error as any)?.response?.data.message,
-        }));
+      if (name === "usridin") {
+        try {
+          const response = await axios.get(
+            `${httpConfig.domain}/api/v1/user/${inputId}`
+          );
+          const user = response?.data.result;
+          setReceivedData((prevState) => ({
+            ...prevState,
+            usrid01: user.userId,
+            fname01: user.firstName,
+            lname01: user.lastName,
+            utype01: user.role,
+            errmsg: "",
+            ...Object.fromEntries(
+              Array.from({ length: 9 }, (_, i) => [`usrid0${i + 2}`, ""])
+            ),
+            ...Object.fromEntries(
+              Array.from({ length: 9 }, (_, i) => [`fname0${i + 2}`, ""])
+            ),
+            ...Object.fromEntries(
+              Array.from({ length: 9 }, (_, i) => [`lname0${i + 2}`, ""])
+            ),
+            ...Object.fromEntries(
+              Array.from({ length: 9 }, (_, i) => [`utype0${i + 2}`, ""])
+            ),
+          }));
+        } catch (error) {
+          setReceivedData((prevState) => ({
+            ...prevState,
+            errmsg: (error as any)?.response?.data.message,
+          }));
+        }
+      } else if (name.startsWith("sel000")) {
+        switch (uppercaseValue) {
+          case "U":
+            navigate("/COUSR02");
+            break;
+          case "D":
+            navigate("/COUSR03");
+            break;
+          default:
+            console.log(uppercaseValue);
+            setReceivedData((prevState) => ({
+              ...prevState,
+              errmsg: "Invalid selection. Valid values are U and D",
+            }));
+        }
       }
     }
   };
@@ -233,7 +251,10 @@ export default function COUSR00() {
         errmsg: "",
       }));
     } catch (error) {
-      console.error("Cannot get user list", error);
+      setReceivedData((prevState) => ({
+        ...prevState,
+        errmsg: "Can not get user list...",
+      }));
     }
   };
 
@@ -250,8 +271,7 @@ export default function COUSR00() {
     const handleKeyDown = (event) => {
       switch (event.key) {
         case "F3":
-          console.log("F3: Back");
-          window.history.back();
+          navigate("/COADM01");
           break;
         case "F7":
           event.preventDefault();
